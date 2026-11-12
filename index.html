@@ -114,6 +114,40 @@
             </div>
         </section>
 
+        <!-- AVIS CLIENTS -->
+        <section id="avis-clients" class="mt-10 mb-8 rounded-2xl border border-border bg-card p-5 sm:p-6">
+            <div class="flex items-start gap-3">
+                <span class="w-10 h-10 rounded-xl bg-amber-400/10 text-amber-300 flex items-center justify-center shrink-0"><i class="fa-solid fa-star"></i></span>
+                <div>
+                    <h2 class="text-lg font-extrabold text-white">Avis de nos clients</h2>
+                    <p class="text-sm text-gray-400 mt-1">Les retours authentiques nous aident à améliorer StreamVault.</p>
+                </div>
+            </div>
+            <div class="mt-5 rounded-xl border border-dashed border-gray-700 bg-bg/60 px-4 py-5 text-center">
+                <i class="fa-regular fa-comment-dots text-2xl text-gray-500"></i>
+                <p class="text-sm font-bold text-white mt-2">Les premiers avis arrivent bientôt</p>
+                <p class="text-xs text-gray-400 mt-1 max-w-md mx-auto">Aucun témoignage client n’a encore été publié. Nous préférons afficher de vrais retours plutôt que de faux avis.</p>
+            </div>
+            <form id="review-form" class="mt-5 grid gap-3">
+                <p class="text-sm font-bold text-white">Vous avez déjà commandé ? Partagez votre expérience.</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <input id="review-name" type="text" required maxlength="60" placeholder="Votre prénom" class="h-11 px-3 rounded-xl bg-bg border border-border text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500">
+                    <select id="review-rating" required class="h-11 px-3 rounded-xl bg-bg border border-border text-sm text-white focus:outline-none focus:border-purple-500">
+                        <option value="5">★★★★★ — Excellent</option>
+                        <option value="4">★★★★☆ — Très bien</option>
+                        <option value="3">★★★☆☆ — Bien</option>
+                        <option value="2">★★☆☆☆ — Moyen</option>
+                        <option value="1">★☆☆☆☆ — Décevant</option>
+                    </select>
+                </div>
+                <textarea id="review-message" required maxlength="500" rows="3" placeholder="Racontez brièvement votre expérience..." class="w-full p-3 rounded-xl bg-bg border border-border text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"></textarea>
+                <button type="submit" class="h-12 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-bg text-sm font-extrabold flex items-center justify-center gap-2">
+                    <i class="fa-brands fa-whatsapp text-lg"></i> Envoyer mon avis
+                </button>
+                <p class="text-[11px] text-gray-500">Votre avis sera envoyé à l’équipe pour vérification avant publication.</p>
+            </form>
+        </section>
+
         <!-- 3) GRILLE DE PRODUITS CLAIRE ET AÉRÉE -->
         <section id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
             <!-- Cartes injectées immédiatement par JavaScript -->
@@ -544,6 +578,26 @@
             document.getElementById('header-cart-btn').addEventListener('click', openDrawer);
             document.getElementById('close-drawer-btn').addEventListener('click', closeDrawer);
             document.getElementById('drawer-backdrop').addEventListener('click', closeDrawer);
+
+            // Envoi d'un avis client à WhatsApp pour vérification avant publication
+            document.getElementById('review-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const name = document.getElementById('review-name').value.trim();
+                const rating = document.getElementById('review-rating').value;
+                const review = document.getElementById('review-message').value.trim();
+                if (!name || !review) return;
+                const stars = '★'.repeat(Number(rating)) + '☆'.repeat(5 - Number(rating));
+                const message = [
+                    'Bonjour StreamVault, voici mon avis client :',
+                    '',
+                    'Nom : ' + name,
+                    'Note : ' + stars + ' (' + rating + '/5)',
+                    'Avis : ' + review,
+                    '',
+                    'Merci de le vérifier avant publication.'
+                ].join('\n');
+                window.open('https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(message), '_blank', 'noopener,noreferrer');
+            });
 
             // Envoi de la commande vers WhatsApp (+2250566579014)
             document.getElementById('order-form').addEventListener('submit', (e) => {
