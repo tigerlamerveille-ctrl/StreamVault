@@ -111,11 +111,6 @@ app.post('/api/paypal/create-order', async (req, res) => {
           description: 'Commande StreamVault',
           custom_id: 'STREAMVAULT',
           invoice_id: 'SV-' + Date.now(),
-          items: order.lines.map(line => ({
-            name: line.name,
-            quantity: line.quantity,
-            unit_amount: { currency_code: order.currency, value: order.amount }
-          })).slice(0, 1),
           amount: {
             currency_code: order.currency,
             value: order.amount
