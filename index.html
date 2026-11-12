@@ -88,6 +88,13 @@
                 <p class="text-sm text-gray-400 mt-1">
                     Activation rapide sur WhatsApp • Garantie 100% incluse
                 </p>
+                <div class="mt-4 rounded-2xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 flex items-center gap-3">
+                    <span class="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center shrink-0"><i class="fa-solid fa-tags"></i></span>
+                    <div>
+                        <p class="text-sm font-extrabold text-white">Économisez avec les abonnements annuels</p>
+                        <p class="text-xs text-gray-300 mt-0.5">Jusqu’à 33 % d’économie par rapport à deux périodes de 6 mois.</p>
+                    </div>
+                </div>
             </div>
 
             <!-- 4 Onglets larges adaptés au pouce -->
@@ -127,6 +134,14 @@
             </div>
         </button>
     </div>
+
+    <!-- Contact WhatsApp toujours accessible -->
+    <a href="https://wa.me/2250566579014?text=Bonjour%20StreamVault%2C%20je%20souhaite%20avoir%20des%20informations%20sur%20vos%20abonnements."
+       target="_blank" rel="noopener noreferrer"
+       aria-label="Contacter StreamVault sur WhatsApp"
+       class="fixed bottom-5 right-4 sm:bottom-7 sm:right-7 z-40 w-14 h-14 rounded-full bg-[#25D366] hover:bg-[#1fbd5b] text-white shadow-xl shadow-green-900/40 flex items-center justify-center text-2xl transition-transform hover:scale-105">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
 
     <!-- TIROIR DE COMMANDE ULTRA-SIMPLE -->
     <div id="drawer-backdrop" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden opacity-0 transition-opacity duration-200"></div>
@@ -294,6 +309,9 @@
                 const durIdx = state.selectedDur[p.id] ?? 1;
                 const activeDur = p.durations[durIdx];
                 const formattedMainPrice = formatPrice(activeDur.priceXOF);
+                const sixMonthPrice = p.durations.find(d => d.label === '6 mois')?.priceXOF;
+                const annualSaving = sixMonthPrice ? (sixMonthPrice * 2) - p.durations.find(d => d.label === '1 an').priceXOF : 0;
+                const annualSavingPercent = sixMonthPrice ? Math.round((annualSaving / (sixMonthPrice * 2)) * 100) : 0;
 
                 const durButtons = p.durations.map((d, idx) => {
                     const active = idx === durIdx;
@@ -339,7 +357,8 @@
                                 </div>
                             </div>
 
-                            <h2 class="text-lg font-extrabold text-white mb-4">${p.title}</h2>
+                            <h2 class="text-lg font-extrabold text-white mb-2">${p.title}</h2>
+                            ${annualSaving > 0 ? `<p class="text-[11px] text-emerald-400 font-bold mb-3"><i class="fa-solid fa-arrow-trend-down mr-1"></i> Jusqu’à ${annualSavingPercent} % d’économie avec 1 an (${formatPrice(annualSaving)} économisés)</p>` : ''}
 
                             <!-- Sélecteur de durée (6 mois / 1 an) -->
                             <div class="flex gap-2 mb-5">
