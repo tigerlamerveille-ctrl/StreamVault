@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StreamVault — Abonnements Netflix, IPTV & Prime Video</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Police Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        bg: '#090a0f',
+                        card: '#12151e',
+                        border: '#1f2433',
+                        netflix: '#E50914',
+                        iptv: '#8B5CF6',
+                        prime: '#00A8E1',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #090a0f;
+            color: #f8fafc;
+            -webkit-tap-highlight-color: transparent;
+        }
+    </style>
+</head>
+<body class="antialiased pb-24 sm:pb-12">
+
+    <!-- Notifications discrètes -->
+    <div id="toast-box" class="fixed top-20 inset-x-4 sm:inset-x-auto sm:right-6 z-50 flex flex-col items-center sm:items-end gap-2 pointer-events-none"></div>
+
+    <!-- 1) BARRE DE NAVIGATION MINIMALISTE -->
+    <header class="sticky top-0 z-40 bg-bg/90 backdrop-blur-md border-b border-border">
+        <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
+            <!-- Marque -->
+            <a href="#" class="flex items-center gap-2.5">
+                <span class="w-8 h-8 rounded-lg bg-gradient-to-tr from-red-600 via-purple-600 to-sky-500 flex items-center justify-center text-white text-xs">
+                    <i class="fa-solid fa-play ml-0.5"></i>
+                </span>
+                <span class="text-lg font-extrabold tracking-tight text-white">
+                    Stream<span class="text-purple-400">Vault</span>
+                </span>
+            </a>
+
+            <!-- Sélecteur de devise + Bouton Panier -->
+            <div class="flex items-center gap-2.5">
+                <div class="relative">
+                    <select id="currency-select" aria-label="Devise" class="appearance-none bg-card border border-border hover:border-gray-600 text-xs font-semibold text-gray-200 rounded-xl h-10 pl-3 pr-7 cursor-pointer focus:outline-none focus:border-purple-500">
+                        <option value="XOF" selected>FCFA</option>
+                        <option value="EUR">EUR €</option>
+                        <option value="USD">USD $</option>
+                    </select>
+                    <i class="fa-solid fa-chevron-down text-[9px] text-gray-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                </div>
+
+                <button id="header-cart-btn" type="button" class="h-10 px-3.5 rounded-xl bg-card hover:bg-border border border-border text-white text-sm font-semibold flex items-center gap-2 transition-colors">
+                    <i class="fa-solid fa-bag-shopping text-purple-400"></i>
+                    <span class="hidden sm:inline">Panier</span>
+                    <span id="header-cart-count" class="min-w-[20px] h-5 px-1.5 rounded-full bg-purple-600 text-white text-xs font-bold flex items-center justify-center">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- CONTENU PRINCIPAL -->
+    <main class="max-w-5xl mx-auto px-4 pt-6 sm:pt-10">
+
+        <!-- 2) EN-TÊTE COMPACT & 4 ONGLETS DE FILTRES TACTILES LARGES -->
+        <section class="mb-7">
+            <div class="mb-5">
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                    Vos abonnements en 2 minutes
+                </h1>
+                <p class="text-sm text-gray-400 mt-1">
+                    Activation rapide sur WhatsApp • Garantie 100% incluse
+                </p>
+            </div>
+
+            <!-- 4 Onglets larges adaptés au pouce -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5" role="tablist">
+                <button type="button" data-filter="all" class="filter-btn h-12 rounded-xl font-bold text-sm bg-white text-bg shadow-sm transition-all">
+                    Tout
+                </button>
+                <button type="button" data-filter="netflix" class="filter-btn h-12 rounded-xl font-bold text-sm bg-card text-gray-300 border border-border hover:border-gray-600 transition-all flex items-center justify-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-netflix"></span>Netflix
+                </button>
+                <button type="button" data-filter="iptv" class="filter-btn h-12 rounded-xl font-bold text-sm bg-card text-gray-300 border border-border hover:border-gray-600 transition-all flex items-center justify-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-iptv"></span>IPTV
+                </button>
+                <button type="button" data-filter="prime" class="filter-btn h-12 rounded-xl font-bold text-sm bg-card text-gray-300 border border-border hover:border-gray-600 transition-all flex items-center justify-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-prime"></span>Prime Video
+                </button>
+            </div>
+        </section>
+
+        <!-- 3) GRILLE DE PRODUITS CLAIRE ET AÉRÉE -->
+        <section id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+            <!-- Cartes injectées immédiatement par JavaScript -->
+        </section>
+
+    </main>
+
+    <!-- 4) BARRE FLOTTANTE EN BAS SUR MOBILE QUAND LE PANIER CONTIENT DES ARTICLES -->
+    <div id="mobile-sticky-bar" class="fixed bottom-4 inset-x-4 z-30 sm:hidden hidden">
+        <button type="button" onclick="openDrawer()" class="w-full h-14 px-5 rounded-2xl bg-emerald-500 active:bg-emerald-600 text-bg font-extrabold text-sm shadow-2xl shadow-emerald-500/30 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+                <span id="sticky-count" class="w-6 h-6 rounded-full bg-bg text-white text-xs font-bold flex items-center justify-center">0</span>
+                <span>Voir mon panier</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span id="sticky-total" class="text-base font-black">0 FCFA</span>
+                <i class="fa-solid fa-chevron-right text-xs"></i>
+            </div>
+        </button>
+    </div>
+
+    <!-- TIROIR DE COMMANDE ULTRA-SIMPLE -->
+    <div id="drawer-backdrop" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden opacity-0 transition-opacity duration-200"></div>
+
+    <aside id="checkout-drawer" class="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-bg border-l border-border flex flex-col transform translate-x-full transition-transform duration-200">
+        
+        <!-- En-tête Tiroir -->
+        <div class="px-5 h-16 border-b border-border flex items-center justify-between shrink-0">
+            <h2 class="text-base font-extrabold text-white">Votre sélection</h2>
+            <button id="close-drawer-btn" type="button" aria-label="Fermer" class="w-10 h-10 rounded-xl bg-card border border-border text-gray-300 hover:text-white flex items-center justify-center">
+                <i class="fa-solid fa-xmark text-base"></i>
+            </button>
+        </div>
+
+        <!-- Contenu Scrollable -->
+        <div class="flex-1 overflow-y-auto p-5 space-y-6">
+            <!-- Articles -->
+            <div id="cart-list" class="space-y-3"></div>
+
+            <!-- Formulaire minimaliste -->
+            <form id="order-form" class="hidden space-y-4 pt-4 border-t border-border">
+                <div>
+                    <label for="client-contact" class="block text-xs font-semibold text-gray-300 mb-1.5">
+                        Votre nom et numéro WhatsApp (ou Email) *
+                    </label>
+                    <input type="text" id="client-contact" required placeholder="Ex: Jean — 07 08 00 00 00" class="w-full h-12 px-4 rounded-xl bg-card border border-border text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500">
+                </div>
+
+                <div>
+                    <label for="payment-choice" class="block text-xs font-semibold text-gray-300 mb-1.5">
+                        Moyen de paiement
+                    </label>
+                    <select id="payment-choice" class="w-full h-12 px-4 rounded-xl bg-card border border-border text-sm text-white focus:outline-none focus:border-emerald-500">
+                        <option value="Wave">Wave</option>
+                        <option value="Orange Money">Orange Money</option>
+                        <option value="MTN MoMo">MTN MoMo</option>
+                        <option value="Moov Money">Moov Money</option>
+                        <option value="Carte Bancaire / PayPal">Carte Bancaire / PayPal</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+
+        <!-- Pied du Tiroir : Total + Bouton Direct WhatsApp -->
+        <div id="drawer-footer" class="hidden p-5 border-t border-border bg-card/60 space-y-3 shrink-0">
+            <div class="flex items-center justify-between">
+                <span class="text-sm text-gray-400">Total</span>
+                <span id="drawer-total" class="text-xl font-black text-white">0 FCFA</span>
+            </div>
+            <button type="submit" form="order-form" class="w-full h-14 px-5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 active:scale-[0.99] text-bg font-extrabold text-base flex items-center justify-center gap-2.5 shadow-lg shadow-emerald-500/20 transition-all">
+                <i class="fa-brands fa-whatsapp text-xl"></i>
+                <span>Commander sur WhatsApp</span>
+            </button>
+        </div>
+
+    </aside>
+
+    <!-- LOGIQUE JAVASCRIPT COMPLÈTE -->
+    <script>
+        // Numéro WhatsApp du vendeur
+        const WHATSAPP_NUMBER = "2250708766749";
+
+        const CURRENCIES = {
+            XOF: { symbol: 'FCFA', rate: 1, before: false, decimals: 0 },
+            EUR: { symbol: '€', rate: 1 / 655.957, before: false, decimals: 2 },
+            USD: { symbol: '$', rate: 1 / 605, before: true, decimals: 2 }
+        };
+
+        // Catalogue avec grille tarifaire exacte (6 mois & 1 an)
+        const PRODUCTS = [
+            {
+                id: 'netflix',
+                category: 'netflix',
+                badge: 'Netflix 4K',
+                badgeStyle: 'bg-red-500/15 text-red-400 border-red-500/30',
+                btnStyle: 'bg-netflix hover:bg-red-700 text-white',
+                title: 'Netflix Ultra HD 4K',
+                features: [
+                    'Qualité 4K Ultra HD sans pub',
+                    'Profil privé verrouillé par code PIN',
+                    'Smart TV, Mobile, PC & Tablette'
+                ],
+                durations: [
+                    { label: '6 mois', priceXOF: 10000 },
+                    { label: '1 an', priceXOF: 15000, tag: 'Économie' }
+                ]
+            },
+            {
+                id: 'iptv-premium',
+                category: 'iptv',
+                badge: 'IPTV Premium',
+                badgeStyle: 'bg-purple-500/15 text-purple-300 border-purple-500/30',
+                btnStyle: 'bg-iptv hover:bg-purple-500 text-white',
+                title: 'IPTV 4K +10 000 Chaînes',
+                features: [
+                    'Canal+, beIN, RMC, Ligue des Champions',
+                    '+35 000 Films & Séries VOD inclus',
+                    'Serveur Anti-Freeze haute stabilité'
+                ],
+                durations: [
+                    { label: '6 mois', priceXOF: 15000 },
+                    { label: '1 an', priceXOF: 20000, tag: 'Économie' }
+                ]
+            },
+            {
+                id: 'prime-video',
+                category: 'prime',
+                badge: 'Prime Video',
+                badgeStyle: 'bg-sky-500/15 text-sky-300 border-sky-500/30',
+                btnStyle: 'bg-prime hover:bg-sky-400 text-bg',
+                title: 'Amazon Prime Video 4K',
+                features: [
+                    'Séries Amazon Originals & Films 4K',
+                    'Mode hors-ligne sur smartphone',
+                    'Profil privé garanti sans coupure'
+                ],
+                durations: [
+                    { label: '6 mois', priceXOF: 10000 },
+                    { label: '1 an', priceXOF: 15000, tag: 'Économie' }
+                ]
+            }
+        ];
+
+        let state = {
+            currency: 'XOF',
+            filter: 'all',
+            // Index 1 = "1 an" sélectionné par défaut pour chaque service
+            selectedDur: { 'netflix': 1, 'iptv-premium': 1, 'prime-video': 1 },
+            cart: []
+        };
+
+        // Formate un montant en FCFA selon la devise active
+        function formatPrice(amountXOF) {
+            const c = CURRENCIES[state.currency] || CURRENCIES.XOF;
+            const converted = amountXOF * c.rate;
+
+            if (c.decimals === 0) {
+                const rounded = Math.round(converted).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+                return `${rounded} ${c.symbol}`;
+            } else {
+                const fixed = converted.toFixed(c.decimals).replace('.', ',');
+                return c.before ? `${c.symbol}${fixed}` : `${fixed} ${c.symbol}`;
+            }
+        }
+
+        // Affiche une notification légère
+        function showToast(message) {
+            const box = document.getElementById('toast-box');
+            const el = document.createElement('div');
+            el.className = 'bg-card border border-emerald-500/40 text-white text-xs font-semibold px-4 py-3 rounded-xl shadow-xl flex items-center gap-2 transition-all duration-200';
+            el.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i><span>${message}</span>`;
+            box.appendChild(el);
+            setTimeout(() => {
+                el.classList.add('opacity-0', '-translate-y-2');
+                setTimeout(() => el.remove(), 220);
+            }, 2200);
+        }
+
+        // Rendu des cartes produits avec prix bien visibles
+        function renderProducts() {
+            const grid = document.getElementById('products-grid');
+            const items = state.filter === 'all' ? PRODUCTS : PRODUCTS.filter(p => p.category === state.filter);
+
+            grid.innerHTML = items.map(p => {
+                const durIdx = state.selectedDur[p.id] ?? 1;
+                const activeDur = p.durations[durIdx];
+                const formattedMainPrice = formatPrice(activeDur.priceXOF);
+
+                const durButtons = p.durations.map((d, idx) => {
+                    const active = idx === durIdx;
+                    const durPrice = formatPrice(d.priceXOF);
+                    return `
+                        <button type="button" onclick="setDuration('${p.id}', ${idx})"
+                            class="flex-1 py-2.5 px-2.5 rounded-xl text-xs font-bold border transition-all flex flex-col items-center justify-center gap-0.5 ${
+                                active 
+                                ? 'bg-white text-bg border-white shadow-sm' 
+                                : 'bg-bg/70 text-gray-300 border-border hover:border-gray-600'
+                            }">
+                            <div class="flex items-center gap-1">
+                                <span>${d.label}</span>
+                                ${d.tag ? `<span class="text-[9px] font-extrabold px-1.5 py-0.2 rounded ${active ? 'bg-emerald-500/20 text-emerald-700' : 'bg-emerald-500/15 text-emerald-400'}">${d.tag}</span>` : ''}
+                            </div>
+                            <span class="text-[11px] font-extrabold ${active ? 'text-gray-700' : 'text-gray-400'}">${durPrice}</span>
+                        </button>
+                    `;
+                }).join('');
+
+                const featuresHtml = p.features.map(f => `
+                    <li class="flex items-start gap-2.5 text-xs sm:text-sm text-gray-300">
+                        <i class="fa-solid fa-check text-emerald-400 mt-1 shrink-0 text-xs"></i>
+                        <span>${f}</span>
+                    </li>
+                `).join('');
+
+                return `
+                    <article class="bg-card border border-border rounded-2xl p-5 flex flex-col justify-between transition-colors hover:border-gray-700">
+                        <div>
+                            <!-- Badge + Prix principal en gros caractères -->
+                            <div class="flex items-start justify-between gap-2 mb-3">
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold border ${p.badgeStyle}">
+                                    ${p.badge}
+                                </span>
+                                <div class="text-right">
+                                    <div class="text-2xl sm:text-3xl font-black text-white tracking-tight leading-none">
+                                        ${formattedMainPrice}
+                                    </div>
+                                    <div class="text-[11px] text-gray-400 font-medium mt-1">
+                                        pour ${activeDur.label}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h2 class="text-lg font-extrabold text-white mb-4">${p.title}</h2>
+
+                            <!-- Sélecteur de durée (6 mois / 1 an) -->
+                            <div class="flex gap-2 mb-5">
+                                ${durButtons}
+                            </div>
+
+                            <!-- 3 avantages clés -->
+                            <ul class="space-y-2.5 mb-6">
+                                ${featuresHtml}
+                            </ul>
+                        </div>
+
+                        <!-- Actions tactiles larges -->
+                        <div class="grid grid-cols-2 gap-2.5 pt-2">
+                            <button type="button" onclick="addToCart('${p.id}', false)"
+                                class="h-12 px-3 rounded-xl bg-bg hover:bg-border border border-border text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-colors">
+                                <i class="fa-solid fa-plus"></i>
+                                <span>Panier</span>
+                            </button>
+                            <button type="button" onclick="addToCart('${p.id}', true)"
+                                class="h-12 px-3 rounded-xl ${p.btnStyle} text-xs sm:text-sm font-extrabold flex items-center justify-center gap-1.5 transition-all shadow-sm">
+                                <span>Commander</span>
+                                <i class="fa-solid fa-arrow-right text-xs"></i>
+                            </button>
+                        </div>
+                    </article>
+                `;
+            }).join('');
+        }
+
+        // Changer la durée sélectionnée sur une carte
+        window.setDuration = function(productId, durIdx) {
+            state.selectedDur[productId] = durIdx;
+            renderProducts();
+        };
+
+        // Ajouter un article au panier (et ouvrir le tiroir si directCheckout = true)
+        window.addToCart = function(productId, directCheckout = false) {
+            const product = PRODUCTS.find(p => p.id === productId);
+            if (!product) return;
+
+            const durIdx = state.selectedDur[productId] ?? 1;
+            const dur = product.durations[durIdx];
+            const itemKey = `${product.id}_${dur.label}`;
+
+            const existing = state.cart.find(item => item.key === itemKey);
+            if (existing) {
+                existing.qty += 1;
+            } else {
+                state.cart.push({
+                    key: itemKey,
+                    title: product.title,
+                    badge: product.badge,
+                    duration: dur.label,
+                    priceXOF: dur.priceXOF,
+                    qty: 1
+                });
+            }
+
+            updateCartUI();
+
+            if (directCheckout) {
+                openDrawer();
+            } else {
+                showToast(`${product.badge} (${dur.label}) ajouté`);
+            }
+        };
+
+        // Modifier la quantité dans le panier
+        window.changeQty = function(itemKey, delta) {
+            const idx = state.cart.findIndex(i => i.key === itemKey);
+            if (idx === -1) return;
+
+            state.cart[idx].qty += delta;
+            if (state.cart[idx].qty <= 0) {
+                state.cart.splice(idx, 1);
+            }
+            updateCartUI();
+        };
+
+        // Mettre à jour tous les compteurs et le contenu du tiroir
+        function updateCartUI() {
+            const totalQty = state.cart.reduce((sum, i) => sum + i.qty, 0);
+            const totalXOF = state.cart.reduce((sum, i) => sum + (i.priceXOF * i.qty), 0);
+
+            document.getElementById('header-cart-count').textContent = totalQty;
+            document.getElementById('sticky-count').textContent = totalQty;
+            document.getElementById('sticky-total').textContent = formatPrice(totalXOF);
+            document.getElementById('drawer-total').textContent = formatPrice(totalXOF);
+
+            const mobileBar = document.getElementById('mobile-sticky-bar');
+            if (totalQty > 0) {
+                mobileBar.classList.remove('hidden');
+            } else {
+                mobileBar.classList.add('hidden');
+            }
+
+            const cartList = document.getElementById('cart-list');
+            const orderForm = document.getElementById('order-form');
+            const drawerFooter = document.getElementById('drawer-footer');
+
+            if (state.cart.length === 0) {
+                cartList.innerHTML = `
+                    <div class="text-center py-12 px-4">
+                        <div class="w-14 h-14 rounded-2xl bg-card border border-border text-gray-500 flex items-center justify-center mx-auto mb-3 text-xl">
+                            <i class="fa-solid fa-bag-shopping"></i>
+                        </div>
+                        <p class="text-sm font-bold text-white">Votre panier est vide</p>
+                        <p class="text-xs text-gray-400 mt-1">Choisissez un abonnement Netflix, IPTV ou Prime Video.</p>
+                    </div>
+                `;
+                orderForm.classList.add('hidden');
+                drawerFooter.classList.add('hidden');
+            } else {
+                cartList.innerHTML = state.cart.map(item => `
+                    <div class="bg-card border border-border rounded-xl p-3.5 flex items-center justify-between gap-3">
+                        <div class="min-w-0">
+                            <div class="text-sm font-bold text-white truncate">${item.title}</div>
+                            <div class="text-xs text-gray-400 mt-0.5">${item.duration} • <span class="text-gray-200 font-semibold">${formatPrice(item.priceXOF)}</span></div>
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <button type="button" onclick="changeQty('${item.key}', -1)" class="w-8 h-8 rounded-lg bg-bg border border-border text-gray-300 hover:text-white flex items-center justify-center text-xs">
+                                <i class="fa-solid fa-minus"></i>
+                            </button>
+                            <span class="w-5 text-center text-xs font-extrabold text-white">${item.qty}</span>
+                            <button type="button" onclick="changeQty('${item.key}', 1)" class="w-8 h-8 rounded-lg bg-bg border border-border text-gray-300 hover:text-white flex items-center justify-center text-xs">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+                orderForm.classList.remove('hidden');
+                drawerFooter.classList.remove('hidden');
+            }
+        }
+
+        // Ouverture / Fermeture du tiroir panier
+        window.openDrawer = function() {
+            const backdrop = document.getElementById('drawer-backdrop');
+            const drawer = document.getElementById('checkout-drawer');
+            backdrop.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                backdrop.classList.remove('opacity-0');
+                drawer.classList.remove('translate-x-full');
+            });
+        };
+
+        window.closeDrawer = function() {
+            const backdrop = document.getElementById('drawer-backdrop');
+            const drawer = document.getElementById('checkout-drawer');
+            backdrop.classList.add('opacity-0');
+            drawer.classList.add('translate-x-full');
+            setTimeout(() => {
+                backdrop.classList.add('hidden');
+            }, 200);
+        };
+
+        // Initialisation immédiate des événements et du rendu
+        document.addEventListener('DOMContentLoaded', () => {
+            // Filtres catégories
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    state.filter = btn.dataset.filter;
+                    document.querySelectorAll('.filter-btn').forEach(b => {
+                        if (b.dataset.filter === state.filter) {
+                            b.className = 'filter-btn h-12 rounded-xl font-bold text-sm bg-white text-bg shadow-sm transition-all flex items-center justify-center gap-2';
+                        } else {
+                            b.className = 'filter-btn h-12 rounded-xl font-bold text-sm bg-card text-gray-300 border border-border hover:border-gray-600 transition-all flex items-center justify-center gap-2';
+                        }
+                    });
+                    renderProducts();
+                });
+            });
+
+            // Changement de devise
+            document.getElementById('currency-select').addEventListener('change', (e) => {
+                state.currency = e.target.value;
+                renderProducts();
+                updateCartUI();
+            });
+
+            // Boutons tiroir
+            document.getElementById('header-cart-btn').addEventListener('click', openDrawer);
+            document.getElementById('close-drawer-btn').addEventListener('click', closeDrawer);
+            document.getElementById('drawer-backdrop').addEventListener('click', closeDrawer);
+
+            // Envoi de la commande vers WhatsApp (+2250708766749)
+            document.getElementById('order-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                if (state.cart.length === 0) return;
+
+                const clientContact = document.getElementById('client-contact').value.trim();
+                const paymentChoice = document.getElementById('payment-choice').value;
+                const totalXOF = state.cart.reduce((sum, i) => sum + (i.priceXOF * i.qty), 0);
+
+                const lines = state.cart.map(i => `• ${i.qty}x ${i.badge} (${i.duration}) : ${formatPrice(i.priceXOF * i.qty)}`);
+                const message = [
+                    `Bonjour StreamVault 👋, je souhaite commander :`,
+                    ``,
+                    ...lines,
+                    ``,
+                    `💰 *Total : ${formatPrice(totalXOF)}*`,
+                    `💳 *Paiement :* ${paymentChoice}`,
+                    `👤 *Client :* ${clientContact}`
+                ].join('\n');
+
+                const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+                window.open(waUrl, '_blank', 'noopener,noreferrer');
+            });
+
+            // Premier rendu immédiat
+            renderProducts();
+            updateCartUI();
+        });
+    </script>
+</body>
+</html>
