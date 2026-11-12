@@ -215,38 +215,37 @@
                     <p class="block text-xs font-semibold text-gray-300">Choisissez votre mode de paiement</p>
                     <input type="hidden" id="payment-choice" value="Wave">
 
-                    <button type="button" data-payment-mode="mobile" aria-pressed="true"
-                        class="payment-mode w-full rounded-2xl border-2 border-emerald-500 bg-emerald-500/10 p-4 text-left transition-all">
-                        <span class="flex items-center gap-3">
-                            <span class="w-11 h-11 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center text-xl"><i class="fa-solid fa-mobile-screen-button"></i></span>
-                            <span class="flex-1">
-                                <span class="block text-sm font-extrabold text-white">Paiement mobile</span>
-                                <span class="block text-xs text-gray-400 mt-1">Wave, Orange Money, MTN MoMo ou Moov Money</span>
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <button type="button" data-payment-mode="mobile" aria-pressed="true"
+                            class="payment-mode min-w-0 rounded-2xl border-2 border-emerald-500 bg-emerald-500/10 p-3 text-center transition-all">
+                            <span class="relative flex flex-col items-center gap-2">
+                                <span class="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center text-xl"><i class="fa-solid fa-mobile-screen-button"></i></span>
+                                <span class="block text-sm font-extrabold text-white leading-tight">Paiement mobile</span>
+                                <span class="block text-[10px] leading-snug text-gray-400">Wave · Orange · MTN · Moov</span>
+                                <i class="payment-check fa-solid fa-circle-check text-emerald-400"></i>
                             </span>
-                            <i class="payment-check fa-solid fa-circle-check text-emerald-400"></i>
-                        </span>
-                        <span class="block mt-3">
-                            <label for="mobile-provider" class="block text-[11px] font-semibold text-gray-300 mb-1.5">Votre opérateur</label>
-                            <select id="mobile-provider" class="w-full h-11 px-3 rounded-xl bg-bg border border-border text-sm text-white focus:outline-none focus:border-emerald-500">
-                                <option value="Wave">Wave</option>
-                                <option value="Orange Money">Orange Money</option>
-                                <option value="MTN MoMo">MTN MoMo</option>
-                                <option value="Moov Money">Moov Money</option>
-                            </select>
-                        </span>
-                    </button>
+                        </button>
 
-                    <button type="button" data-payment-mode="paypal" aria-pressed="false"
-                        class="payment-mode w-full rounded-2xl border-2 border-border bg-card p-4 text-left transition-all">
-                        <span class="flex items-center gap-3">
-                            <span class="w-11 h-11 rounded-xl bg-blue-500/15 text-blue-300 flex items-center justify-center text-xl"><i class="fa-brands fa-paypal"></i></span>
-                            <span class="flex-1">
-                                <span class="block text-sm font-extrabold text-white">PayPal — paiement en ligne</span>
-                                <span class="block text-xs text-gray-400 mt-1">Payez directement et en toute sécurité sur PayPal</span>
+                        <button type="button" data-payment-mode="paypal" aria-pressed="false"
+                            class="payment-mode min-w-0 rounded-2xl border-2 border-border bg-card p-3 text-center transition-all">
+                            <span class="relative flex flex-col items-center gap-2">
+                                <span class="w-10 h-10 rounded-xl bg-blue-500/15 text-blue-300 flex items-center justify-center text-xl"><i class="fa-brands fa-paypal"></i></span>
+                                <span class="block text-sm font-extrabold text-white leading-tight">PayPal</span>
+                                <span class="block text-[10px] leading-snug text-gray-400">Paiement en ligne sécurisé</span>
+                                <i class="payment-check hidden fa-solid fa-circle-check text-blue-300"></i>
                             </span>
-                            <i class="payment-check hidden fa-solid fa-circle-check text-blue-300"></i>
-                        </span>
-                    </button>
+                        </button>
+                    </div>
+
+                    <div id="mobile-provider-wrap" class="rounded-xl border border-border bg-card/70 p-3">
+                        <label for="mobile-provider" class="block text-[11px] font-semibold text-gray-300 mb-1.5">Choisissez votre opérateur mobile</label>
+                        <select id="mobile-provider" class="w-full h-11 px-3 rounded-xl bg-bg border border-border text-sm text-white focus:outline-none focus:border-emerald-500">
+                            <option value="Wave">Wave</option>
+                            <option value="Orange Money">Orange Money</option>
+                            <option value="MTN MoMo">MTN MoMo</option>
+                            <option value="Moov Money">Moov Money</option>
+                        </select>
+                    </div>
                 </div>
             </form>
         </div>
@@ -627,6 +626,7 @@
                     document.getElementById('payment-choice').value = isPaypal
                         ? 'PayPal'
                         : document.getElementById('mobile-provider').value;
+                    document.getElementById('mobile-provider-wrap').classList.toggle('hidden', isPaypal);
                 });
             });
             document.getElementById('mobile-provider').addEventListener('change', (e) => {
