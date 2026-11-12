@@ -220,7 +220,7 @@
                         <option value="Orange Money">Orange Money</option>
                         <option value="MTN MoMo">MTN MoMo</option>
                         <option value="Moov Money">Moov Money</option>
-                        <option value="Carte Bancaire / PayPal">Carte Bancaire / PayPal</option>
+                        <option value="PayPal">PayPal — paiement sécurisé</option>
                     </select>
                 </div>
             </form>
@@ -244,6 +244,7 @@
     <script>
         // Numéro WhatsApp du vendeur
         const WHATSAPP_NUMBER = "2250566579014";
+        const PAYPAL_API_BASE = "https://streamvault-paypal-api.onrender.com";
 
         const CURRENCIES = {
             XOF: { symbol: 'FCFA', rate: 1, before: false, decimals: 0 },
@@ -451,6 +452,7 @@
             } else {
                 state.cart.push({
                     key: itemKey,
+                    productId: product.id,
                     title: product.title,
                     badge: product.badge,
                     duration: dur.label,
@@ -606,16 +608,50 @@
                 window.open('https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(message), '_blank', 'noopener,noreferrer');
             });
 
-            // Envoi de la commande vers WhatsApp (+2250566579014)
-            document.getElementById('order-form').addEventListener('submit', (e) => {
+            // Paiement PayPal : création côté serveur, puis capture vérifiée côté serveur.
+            document.getElementById('order-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 if (state.cart.length === 0) return;
 
                 const clientContact = document.getElementById('client-contact').value.trim();
                 const paymentChoice = document.getElementById('payment-choice').value;
                 const totalXOF = state.cart.reduce((sum, i) => sum + (i.priceXOF * i.qty), 0);
-
                 const lines = state.cart.map(i => `• ${i.qty}x ${i.badge} (${i.duration}) : ${formatPrice(i.priceXOF * i.qty)}`);
+
+                if (paymentChoice === 'PayPal') {
+                    const button = document.querySelector('button[form="order-form"][type="submit"]');
+                    const oldLabel = button.innerHTML;
+                    button.disabled = true;
+                    button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Connexion à PayPal...</span>';
+                    try {
+                        sessionStorage.setItem('streamvault_pending_order', JSON.stringify({
+                            contact: clientContact,
+                            items: state.cart.map(i => ({ productId: i.productId, duration: i.duration, quantity: i.qty })),
+                            lines,
+                            totalXOF,
+                            currency: state.currency
+                        }));
+                        const response = await fetch(PAYPAL_API_BASE + '/api/paypal/create-order', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                contact: clientContact,
+                                currency: state.currency,
+                                items: state.cart.map(i => ({ productId: i.productId, duration: i.duration, quantity: i.qty }))
+                            })
+                        });
+                        const data = await response.json();
+                        if (!response.ok || !data.approvalUrl) throw new Error(data.error || 'PayPal est momentanément indisponible.');
+                        window.location.href = data.approvalUrl;
+                    } catch (error) {
+                        sessionStorage.removeItem('streamvault_pending_order');
+                        showToast(error.message || 'Impossible de lancer le paiement PayPal.');
+                        button.disabled = false;
+                        button.innerHTML = oldLabel;
+                    }
+                    return;
+                }
+
                 const message = [
                     `Bonjour StreamVault 👋, je souhaite commander :`,
                     ``,
@@ -629,6 +665,44 @@
                 const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
                 window.open(waUrl, '_blank', 'noopener,noreferrer');
             });
+
+            // Au retour de PayPal, ne confirmer la commande qu'après capture validée par l'API.
+            const paypalParams = new URLSearchParams(window.location.search);
+            if (paypalParams.get('paypal') === 'success' && paypalParams.get('token')) {
+                const orderId = paypalParams.get('token');
+                const pending = sessionStorage.getItem('streamvault_pending_order');
+                history.replaceState({}, document.title, window.location.pathname);
+                fetch(PAYPAL_API_BASE + '/api/paypal/capture-order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ orderId })
+                }).then(async response => {
+                    const data = await response.json();
+                    if (!response.ok || data.status !== 'COMPLETED') throw new Error(data.error || 'Paiement non confirmé.');
+                    const order = pending ? JSON.parse(pending) : null;
+                    sessionStorage.removeItem('streamvault_pending_order');
+                    showToast('Paiement PayPal confirmé !');
+                    if (order) {
+                        const message = [
+                            'Bonjour StreamVault 👋, mon paiement PayPal est confirmé.',
+                            '',
+                            ...(order.lines || []),
+                            '',
+                            'Total affiché : ' + (order.totalXOF || 0) + ' FCFA',
+                            'Référence PayPal : ' + data.orderId,
+                            'Référence capture : ' + data.captureId,
+                            'Contact client : ' + order.contact
+                        ].join('\n');
+                        window.location.href = 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(message);
+                    }
+                }).catch(error => {
+                    sessionStorage.removeItem('streamvault_pending_order');
+                    showToast(error.message || 'Impossible de vérifier le paiement.');
+                });
+            } else if (paypalParams.get('paypal') === 'cancel') {
+                history.replaceState({}, document.title, window.location.pathname);
+                showToast('Paiement PayPal annulé. Aucun débit confirmé.');
+            }
 
             // Premier rendu immédiat
             renderProducts();
